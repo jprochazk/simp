@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Editor</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #ffffff; --fg: #000000; --muted-border: #cccccc; --panel-bg: #ffffff; --gutter-bg: #f5f5f5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0e0f11; --fg: #e6e6e6; --muted-border: #333333; --panel-bg: #121417; --gutter-bg: #171a1f; }
+    }
+
+    html, body { height: 100%; box-sizing: border-box; }
+    body { display: flex; margin: 0; font-family: monospace; background: var(--bg); color: var(--fg); }
+
+    #controls { margin: 8px 0; }
+    button { padding: 4px 8px; outline: 1px solid var(--muted-border); background: transparent; color: var(--fg); }
+    button:focus { outline: 1px dotted var(--fg); outline-offset: 2px; }
+
+    #editor { display: flex; outline: 1px solid var(--muted-border); height: 100%; width: 50%; background: var(--panel-bg); }
+    #gutter { margin: 0; padding: 8px 4px; text-align: right; user-select: none; overflow: hidden; background: var(--gutter-bg); color: var(--fg); line-height: 1.4; font-family: inherit; }
+    #code { flex: 1; border: 0; margin: 0; padding: 8px; resize: none; outline: none; font-family: inherit; line-height: 1.4; tab-size: 2; overflow: auto; background: var(--panel-bg); color: var(--fg); }
+    #gutter, #code { height: 100%; box-sizing: border-box; }
+
+    #output { outline: 1px solid var(--muted-border); height: 100%; width: 50%; background: var(--panel-bg); color: var(--fg); margin-top: 0; }
+    #output > pre { padding: 8px; white-space: pre-wrap; margin: 0 }
+  </style>
+  <link data-trunk rel="scss" href="index.scss"/>
+  <link data-trunk rel="rust"/>
+</head>
+<body>
+  <div id="editor" aria-label="Code editor">
+    <pre id="gutter">1\n</pre>
+    <textarea id="code" spellcheck="false" wrap="off" aria-label="Code input" placeholder="// Paste or type your code here"></textarea>
+  </div>
+  <div id="output">
+    <pre id="output-area" aria-live="polite"></pre>
+  </div>
+
+  <script>
+    addEventListener("TrunkApplicationStarted", (event) => {
+      update();
+      console.log("wasm initialized");
+    });
+
+    function parse(input) {
+      if (wasmBindings) {
+        return wasmBindings.parse(input)
+      } else {
+        return "<parser isn't initialized yet!>";
+      }
+    }
+
+    const codeEl = document.getElementById('code');
+    const gutterEl = document.getElementById('gutter');
+    const outputEl = document.getElementById('output-area');
+
+    function update() {
+      run();
+      const lines = codeEl.value.split('\n').length || 1;
+      let nums = '';
+      for (let i = 1; i <= lines; i++) nums += i + '\n';
+      gutterEl.textContent = nums;
+      const digits = String(lines).length;
+      gutterEl.style.width = (digits + 1) + 'ch';
+    }
+
+    function syncScroll() {
+      gutterEl.scrollTop = codeEl.scrollTop;
+    }
+
+    function print(value) {
+      outputEl.textContent = (value).toString();
+    }
+
+    function printError(err) {
+      const msg = (err && (err.stack || err.message)) ? (err.stack || err.message) : String(err);
+      outputEl.textContent = 'Error: ' + msg;
+    }
+
+    function run() {
+      try {
+        const result = parse(codeEl.value);
+        print(result);
+      } catch (e) {
+        printError(e);
+      }
+    }
+
+    codeEl.addEventListener('input', update);
+    codeEl.addEventListener('scroll', syncScroll);
+
+    codeEl.addEventListener('keydown', function(e) {
+      const insert = (text, moveTo = 'end') => {
+        const start = codeEl.selectionStart;
+        const end = codeEl.selectionEnd;
+        codeEl.setRangeText(text, start, end, typeof moveTo === "string" ? moveTo : undefined);
+        if (typeof moveTo === "number") {
+          codeEl.setSelectionRange(start+moveTo, start+moveTo);
+        }
+      }
+
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        insert('    ');
+      } else if (e.key === 'Enter') {
+        
+      } else if (e.shiftKey && e.key === '{') {
+        e.preventDefault();
+        insert('{}', 1);
+      } else if (e.key === '}') {
+        const start = codeEl.selectionStart;
+        const end = codeEl.selectionEnd;
+        if (codeEl.value.slice(start, end+1) === '}') {
+          e.preventDefault();
+          codeEl.setSelectionRange(start+1, end+1);
+        }
+      } else if (e.shiftKey && e.key === '(') {
+        e.preventDefault();
+        insert('()', 1);
+      } else if (e.key === ')') {
+        const start = codeEl.selectionStart;
+        const end = codeEl.selectionEnd;
+        if (codeEl.value.slice(start, end+1) === ')') {
+          e.preventDefault();
+          codeEl.setSelectionRange(start+1, end+1);
+        }
+      }
+
+      update();
+      console.log(e.key, e);
+    });
+
+    update();
+  </script>
+</body>
+</html>
