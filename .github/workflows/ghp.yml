@@ -30,11 +30,18 @@ jobs:
       - name: Set up Trunk
         uses: jetli/trunk-action@1346cc09eace4beb84e403e199a471346d4684c9 # v0.5.1
 
-      - name: Build
-        run: trunk build -o dist
-      
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
+
+      - name: Build
+        shell: bash
+        run: |
+          cd web
+          trunk build \
+            --public-url "${{ steps.pages.outputs.base_url }}" \
+            --dist "../dist" \
+            --release
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
