@@ -8,3 +8,7 @@ logos = "0.15.1"
 
 [workspace]
 members = ["web"]
+
+[dev-dependencies]
+glob_test = "0.1.0"
+insta = "1.43.1"

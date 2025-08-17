@@ -1,0 +1,7 @@
+---
+source: src/parser/tests.rs
+expression: parse(&input)
+---
+Let
+  name: "v"
+  value: Int 0
