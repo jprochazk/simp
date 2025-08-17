@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 /// A program is a block of statements, with an optional trailing expression.
 #[derive(Debug)]
 pub struct Program {
@@ -7,7 +5,6 @@ pub struct Program {
     pub tail: Option<Expr>,
 }
 
-#[derive(Debug)]
 pub enum Stmt {
     Fn(Box<StmtFn>),
     Let(Box<StmtLet>),
@@ -27,7 +24,6 @@ pub struct StmtLet {
     pub value: Expr,
 }
 
-#[derive(Debug)]
 pub enum Expr {
     If(Box<ExprIf>),
     Binary(Box<ExprBinary>),
@@ -169,214 +165,27 @@ pub struct Block {
     pub tail: Option<Expr>,
 }
 
-thread_local! {
-    static INDENT: Cell<usize> = const { Cell::new(0) };
-}
-
-struct W;
-
-impl std::fmt::Display for W {
+impl std::fmt::Debug for Stmt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for _ in 0..INDENT.with(|v| v.get()) {
-            f.write_str("  ")?;
-        }
-
-        Ok(())
-    }
-}
-
-fn indent() {
-    INDENT.with(|v| v.set(v.get() + 1));
-}
-
-fn dedent() {
-    INDENT.with(|v| v.set(v.get() - 1));
-}
-
-impl std::fmt::Display for Program {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        indent();
-        for item in &self.body {
-            writeln!(f, "{item}")?;
-        }
-
-        if let Some(tail) = &self.tail {
-            writeln!(f, "(tail) {tail}")?;
-        }
-        dedent();
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for Stmt {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        macro_rules! nest {
-            ($v:expr) => {{
-                write!(f, "{}", $v)?;
-            }};
-        }
         match self {
-            Stmt::Fn(v) => nest!(v),
-            Stmt::Let(v) => nest!(v),
-            Stmt::Expr(v) => nest!(v),
+            Stmt::Fn(v) => std::fmt::Debug::fmt(v, f),
+            Stmt::Let(v) => std::fmt::Debug::fmt(v, f),
+            Stmt::Expr(v) => std::fmt::Debug::fmt(v, f),
         }
-
-        Ok(())
     }
 }
 
-impl std::fmt::Display for StmtFn {
+impl std::fmt::Debug for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Fn")?;
-        writeln!(f, "{W}name: {:?}", self.name)?;
-        writeln!(f, "{W}params: {:?}", self.params)?;
-        writeln!(f, "{W}body: {}", self.body)?;
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for StmtLet {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Let")?;
-        writeln!(f, "{W}name: {:?}", self.name)?;
-        writeln!(f, "{W}value: {}", self.value)?;
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for Expr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        macro_rules! nest {
-            ($v:expr) => {{
-                write!(f, "{}", $v)?;
-            }};
-        }
         match self {
-            Expr::If(v) => nest!(v),
-            Expr::Binary(v) => nest!(v),
-            Expr::Unary(v) => nest!(v),
-            Expr::Call(v) => nest!(v),
-            Expr::Int(v) => nest!(v),
-            Expr::Str(v) => nest!(v),
-            Expr::Ident(v) => nest!(v),
-            Expr::Block(v) => nest!(v),
+            Expr::If(v) => std::fmt::Debug::fmt(v, f),
+            Expr::Binary(v) => std::fmt::Debug::fmt(v, f),
+            Expr::Unary(v) => std::fmt::Debug::fmt(v, f),
+            Expr::Call(v) => std::fmt::Debug::fmt(v, f),
+            Expr::Int(v) => std::fmt::Debug::fmt(v, f),
+            Expr::Str(v) => std::fmt::Debug::fmt(v, f),
+            Expr::Ident(v) => std::fmt::Debug::fmt(v, f),
+            Expr::Block(v) => std::fmt::Debug::fmt(v, f),
         }
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for ExprIf {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "If")?;
-        for branch in &self.branches {
-            writeln!(f, "{W}Branch")?;
-            indent();
-            writeln!(f, "{W}cond: {}", branch.cond)?;
-            writeln!(f, "{W}body: {}", branch.body)?;
-            dedent();
-        }
-        if let Some(tail) = &self.tail {
-            writeln!(f, "{W}tail: {tail}")?;
-        }
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for ExprBinary {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Binary")?;
-        writeln!(f, "{W}op: {:?}", self.op)?;
-        writeln!(f, "{W}lhs: {}", self.lhs)?;
-        writeln!(f, "{W}rhs: {}", self.rhs)?;
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for ExprUnary {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Unary")?;
-        writeln!(f, "{W}{:?}", self.op)?;
-        writeln!(f, "{W}rhs: {}", self.rhs)?;
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for ExprCall {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Call")?;
-        writeln!(f, "{W}callee: {}", self.callee)?;
-        writeln!(f, "{W}args: [")?;
-        indent();
-        for arg in &self.args {
-            write!(f, "{W}{arg}")?;
-        }
-        dedent();
-        writeln!(f, "{W}]")?;
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for ExprInt {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Int {}", self.value)?;
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for ExprStr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "str {:?}", self.value)?;
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for ExprIdent {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ident {:?}", self.name)?;
-
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for ExprBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.inner)
-    }
-}
-
-impl std::fmt::Display for Block {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.body.is_empty() && self.tail.is_none() {
-            writeln!(f, "Block []")?;
-            return Ok(());
-        }
-        writeln!(f, "Block [")?;
-        indent();
-        for item in &self.body {
-            let w = W.to_string();
-            indent();
-            write!(f, "{w}{item}")?;
-            dedent();
-        }
-        if let Some(tail) = &self.tail {
-            let w = W.to_string();
-            indent();
-            write!(f, "{w}{tail}")?;
-            dedent();
-        }
-        dedent();
-        write!(f, "{W}]")?;
-
-        Ok(())
     }
 }

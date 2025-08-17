@@ -2,13 +2,20 @@
 source: src/parser/tests.rs
 expression: parse(&input)
 ---
-Fn
-  name: "outer"
-  params: []
-  body: Block [
-    Fn
-      name: "inner"
-      params: []
-      body: Block []
-
-  ]
+StmtFn {
+    name: "outer",
+    params: [],
+    body: Block {
+        body: [
+            StmtFn {
+                name: "inner",
+                params: [],
+                body: Block {
+                    body: [],
+                    tail: None,
+                },
+            },
+        ],
+        tail: None,
+    },
+}
