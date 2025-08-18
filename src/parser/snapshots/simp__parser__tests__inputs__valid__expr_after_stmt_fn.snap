@@ -1,0 +1,15 @@
+---
+source: src/parser/tests.rs
+expression: parse(&input)
+---
+StmtFn {
+    name: "f",
+    params: [],
+    body: Block {
+        body: [],
+        tail: None,
+    },
+}
+ExprInt {
+    value: 0,
+}
