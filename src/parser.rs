@@ -268,6 +268,7 @@ fn parse_expr_unary(c: &mut Cursor) -> Result<Expr> {
         OP_BANG => UnaryOp::Not,
         _ => return parse_expr_postfix(c),
     };
+    c.advance(); // eat `op`
     let rhs = parse_expr_unary(c)?;
     Ok(Expr::Unary(Box::new(ExprUnary { op, rhs })))
 }
