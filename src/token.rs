@@ -33,7 +33,7 @@ pub enum TokenKind {
     #[token(">=")] OP_GE,
     #[token("!")] OP_BANG,
 
-    #[regex(r"0|([1-9][0-9]*)")]
+    #[regex(r"[0-9]+")]
     LIT_INT,
 
     #[regex(r#""([^"\\]|\\.)*""#)]
