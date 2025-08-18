@@ -1,0 +1,169 @@
+---
+source: src/parser/tests.rs
+expression: parse(&input)
+---
+ExprBlock {
+    inner: Block {
+        body: [],
+        tail: None,
+    },
+}
+ExprBlock {
+    inner: Block {
+        body: [],
+        tail: Some(
+            ExprInt {
+                value: 0,
+            },
+        ),
+    },
+}
+ExprBlock {
+    inner: Block {
+        body: [
+            ExprInt {
+                value: 0,
+            },
+        ],
+        tail: Some(
+            ExprInt {
+                value: 1,
+            },
+        ),
+    },
+}
+ExprBlock {
+    inner: Block {
+        body: [],
+        tail: Some(
+            ExprBlock {
+                inner: Block {
+                    body: [],
+                    tail: None,
+                },
+            },
+        ),
+    },
+}
+ExprBlock {
+    inner: Block {
+        body: [
+            ExprBlock {
+                inner: Block {
+                    body: [],
+                    tail: None,
+                },
+            },
+        ],
+        tail: Some(
+            ExprBlock {
+                inner: Block {
+                    body: [],
+                    tail: None,
+                },
+            },
+        ),
+    },
+}
+ExprBlock {
+    inner: Block {
+        body: [],
+        tail: Some(
+            ExprBlock {
+                inner: Block {
+                    body: [],
+                    tail: Some(
+                        ExprInt {
+                            value: 0,
+                        },
+                    ),
+                },
+            },
+        ),
+    },
+}
+ExprBlock {
+    inner: Block {
+        body: [
+            ExprBlock {
+                inner: Block {
+                    body: [],
+                    tail: Some(
+                        ExprInt {
+                            value: 0,
+                        },
+                    ),
+                },
+            },
+        ],
+        tail: Some(
+            ExprBlock {
+                inner: Block {
+                    body: [],
+                    tail: Some(
+                        ExprInt {
+                            value: 1,
+                        },
+                    ),
+                },
+            },
+        ),
+    },
+}
+ExprBlock {
+    inner: Block {
+        body: [],
+        tail: Some(
+            ExprBlock {
+                inner: Block {
+                    body: [
+                        ExprInt {
+                            value: 0,
+                        },
+                    ],
+                    tail: Some(
+                        ExprInt {
+                            value: 1,
+                        },
+                    ),
+                },
+            },
+        ),
+    },
+}
+ExprBlock {
+    inner: Block {
+        body: [
+            ExprBlock {
+                inner: Block {
+                    body: [
+                        ExprInt {
+                            value: 0,
+                        },
+                    ],
+                    tail: Some(
+                        ExprInt {
+                            value: 1,
+                        },
+                    ),
+                },
+            },
+        ],
+        tail: Some(
+            ExprBlock {
+                inner: Block {
+                    body: [
+                        ExprInt {
+                            value: 1,
+                        },
+                    ],
+                    tail: Some(
+                        ExprInt {
+                            value: 2,
+                        },
+                    ),
+                },
+            },
+        ),
+    },
+}

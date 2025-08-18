@@ -129,15 +129,20 @@ fn parse_stmt_let(c: &mut Cursor) -> Result<Stmt> {
 fn parse_stmt_expr(c: &mut Cursor) -> Result<Stmt> {
     let expr = parse_expr(c)?;
 
+    // attempt to consume a semicolon
     let semi = c.eat(TOK_SEMI);
-    if !semi && !c.at(TOK_EOF) && !c.was(TOK_RBRACE) {
-        // this isn't a trailing expression,
-        // so the semicolon is not optional.
-        return error(
-            format!("expected a semicolon, got {:?}", c.kind()),
-            c.current().span,
-        )
-        .into();
+    if !semi {
+        if c.was(TOK_RBRACE) {
+            // blocks don't require semicolons
+        } else if !c.at(TOK_EOF) && !c.at(TOK_RBRACE) {
+            // this isn't a trailing expression,
+            // so the semicolon is not optional.
+            return error(
+                format!("expected a semicolon, got {:?}", c.kind()),
+                c.current().span,
+            )
+            .into();
+        }
     }
 
     Ok(Stmt::Expr(Box::new(expr)))
