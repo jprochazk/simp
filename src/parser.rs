@@ -309,8 +309,11 @@ fn parse_expr_primary(c: &mut Cursor) -> Result<Expr> {
 
 fn parse_expr_int(c: &mut Cursor) -> Result<Expr> {
     let token = c.must(LIT_INT)?;
-    let value: i64 = c
-        .lexeme(token)
+    let lexeme = c.lexeme(token);
+    if lexeme.starts_with('0') && lexeme.len() > 1 {
+        return error(format!("invalid integer"), token.span).into();
+    }
+    let value: i64 = lexeme
         .parse()
         .map_err(|err| error(format!("failed to parse integer: {err}"), token.span))?;
     Ok(Expr::Int(Box::new(ExprInt { value })))
