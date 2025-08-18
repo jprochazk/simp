@@ -130,7 +130,7 @@ fn parse_stmt_expr(c: &mut Cursor) -> Result<Stmt> {
     let expr = parse_expr(c)?;
 
     let semi = c.eat(TOK_SEMI);
-    if !semi && !c.at(TOK_EOF) && !c.at(TOK_RBRACE) {
+    if !semi && !c.at(TOK_EOF) && !c.was(TOK_RBRACE) {
         // this isn't a trailing expression,
         // so the semicolon is not optional.
         return error(
