@@ -1,3 +1,12 @@
 /target
 /target_ra
 /dist
+
+
+# bench stuff
+bench.csv
+bench.png
+bench_pagefaults.png
+bench_rss.png
+bench_runtime.png
+benches/inputs/

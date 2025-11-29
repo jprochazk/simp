@@ -136,7 +136,7 @@ def generate_test_file(path, target_bytes):
 
 
 def generate_input_files(output_dir):
-    """Generate test files in 10x increments up to 10 MiB."""
+    """Generate test files with smooth progression up to 100 MiB."""
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -147,8 +147,14 @@ def generate_input_files(output_dir):
         ("input_1kb.simp", 1 * KB),
         ("input_10kb.simp", 10 * KB),
         ("input_100kb.simp", 100 * KB),
+        ("input_250kb.simp", 250 * KB),
+        ("input_500kb.simp", 500 * KB),
         ("input_1mb.simp", 1 * MB),
+        ("input_2500kb.simp", int(2.5 * MB)),
+        ("input_5mb.simp", 5 * MB),
         ("input_10mb.simp", 10 * MB),
+        ("input_25mb.simp", 25 * MB),
+        ("input_50mb.simp", 50 * MB),
         ("input_100mb.simp", 100 * MB),
     ]
 
@@ -223,63 +229,94 @@ def enrich_results(results):
         r["pf_total"] = r["maj_pf"] + r["min_pf"]
 
 
-def plot_results(results, output_path):
+def plot_results(results, output_prefix):
     if not results:
         print("No results to plot.")
         return
 
     enrich_results(results)
-
-    max_rss = max(r["max_rss_mib"] for r in results)
-    min_rss = min(r["max_rss_mib"] for r in results)
-    rss_span = max(max_rss - min_rss, 1e-6)
-
     kinds = sorted(set(r["kind"] for r in results))
 
+    # Plot 1: Runtime vs Input Size
     plt.figure(figsize=(10, 7))
-
     for kind in kinds:
         xs = []
         ys = []
-        sizes = []
-        labels = []
 
         for r in results:
             if r["kind"] != kind:
                 continue
-            xs.append(r["runtime_sec"])
-            ys.append(r["input_size_mib"])
+            xs.append(r["input_size_mib"])
+            ys.append(r["runtime_sec"])
 
-            # Map [min_rss, max_rss] -> [50, 500] for marker area
-            norm = (r["max_rss_mib"] - min_rss) / rss_span
-            sizes.append(50 + 450 * norm)
-            labels.append(str(r["pf_total"]))
+        sorted_data = sorted(zip(xs, ys))
+        xs, ys = zip(*sorted_data) if sorted_data else ([], [])
+        plt.plot(xs, ys, marker='o', label=kind, linewidth=2, markersize=6)
 
-        scatter = plt.scatter(xs, ys, s=sizes, alpha=0.7, label=kind)
-
-        # Annotate with total page faults
-        for x, y, label in zip(xs, ys, labels):
-            plt.annotate(
-                label,
-                (x, y),
-                textcoords="offset points",
-                xytext=(3, 3),
-                fontsize=8,
-                alpha=0.7,
-            )
-
-    plt.xlabel("Runtime (s)")
-    plt.ylabel("Input size (MiB)")
-    plt.title(
-        "Bench profile: color = kind, marker size = max RSS (MiB), "
-        "label = total page faults"
-    )
-    plt.legend(title="kind")
+    plt.xlabel("Input size (MiB)")
+    plt.ylabel("Runtime (s)")
+    plt.title("Parser Performance: Runtime vs Input Size")
+    plt.legend(title="Parser")
     plt.grid(True, linestyle="--", alpha=0.3)
-
     plt.tight_layout()
-    plt.savefig(output_path, dpi=200)
-    print(f"Wrote plot to {output_path}")
+    runtime_path = f"{output_prefix}_runtime.png"
+    plt.savefig(runtime_path, dpi=200)
+    print(f"Wrote runtime plot to {runtime_path}")
+    plt.close()
+
+    # Plot 2: Max RSS vs Input Size
+    plt.figure(figsize=(10, 7))
+    for kind in kinds:
+        xs = []
+        ys = []
+
+        for r in results:
+            if r["kind"] != kind:
+                continue
+            xs.append(r["input_size_mib"])
+            ys.append(r["max_rss_mib"])
+
+        sorted_data = sorted(zip(xs, ys))
+        xs, ys = zip(*sorted_data) if sorted_data else ([], [])
+        plt.plot(xs, ys, marker='o', label=kind, linewidth=2, markersize=6)
+
+    plt.xlabel("Input size (MiB)")
+    plt.ylabel("Max RSS (MiB)")
+    plt.title("Parser Memory Usage: Max RSS vs Input Size")
+    plt.legend(title="Parser")
+    plt.grid(True, linestyle="--", alpha=0.3)
+    plt.tight_layout()
+    rss_path = f"{output_prefix}_rss.png"
+    plt.savefig(rss_path, dpi=200)
+    print(f"Wrote RSS plot to {rss_path}")
+    plt.close()
+
+    # Plot 3: Page Faults vs Input Size
+    plt.figure(figsize=(10, 7))
+    for kind in kinds:
+        xs = []
+        ys = []
+
+        for r in results:
+            if r["kind"] != kind:
+                continue
+            xs.append(r["input_size_mib"])
+            ys.append(r["pf_total"])
+
+        sorted_data = sorted(zip(xs, ys))
+        xs, ys = zip(*sorted_data) if sorted_data else ([], [])
+        plt.plot(xs, ys, marker='o', label=kind, linewidth=2, markersize=6)
+
+    plt.xlabel("Input size (MiB)")
+    plt.ylabel("Total Page Faults")
+    plt.title("Parser Page Faults: Total vs Input Size")
+    plt.legend(title="Parser")
+    plt.grid(True, linestyle="--", alpha=0.3)
+    plt.tight_layout()
+    pf_path = f"{output_prefix}_pagefaults.png"
+    plt.savefig(pf_path, dpi=200)
+    print(f"Wrote page faults plot to {pf_path}")
+    plt.close()
 
 
 def write_csv(results, path):
@@ -325,9 +362,9 @@ def main():
                 f"maj_pf={res['maj_pf']}, min_pf={res['min_pf']}"
             )
 
-    plot_path = "bench.png"
+    output_prefix = "bench"
     csv_path = "bench.csv"
-    plot_results(results, plot_path)
+    plot_results(results, output_prefix)
     write_csv(results, csv_path)
 
 
