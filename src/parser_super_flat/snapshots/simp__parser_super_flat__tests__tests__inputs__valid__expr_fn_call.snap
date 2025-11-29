@@ -1,0 +1,72 @@
+---
+source: src/parser_super_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr {
+    inner: ExprCall {
+        callee: ExprIdent(
+            "f",
+        ),
+        args: [],
+    },
+}
+StmtExpr {
+    inner: ExprCall {
+        callee: ExprIdent(
+            "f",
+        ),
+        args: [
+            ExprInt(
+                1,
+            ),
+        ],
+    },
+}
+StmtExpr {
+    inner: ExprCall {
+        callee: ExprIdent(
+            "f",
+        ),
+        args: [
+            ExprInt(
+                1,
+            ),
+        ],
+    },
+}
+StmtExpr {
+    inner: ExprCall {
+        callee: ExprIdent(
+            "f",
+        ),
+        args: [
+            ExprInt(
+                1,
+            ),
+            ExprInt(
+                2,
+            ),
+            ExprInt(
+                3,
+            ),
+        ],
+    },
+}
+StmtExpr {
+    inner: ExprCall {
+        callee: ExprIdent(
+            "f",
+        ),
+        args: [
+            ExprInt(
+                1,
+            ),
+            ExprInt(
+                2,
+            ),
+            ExprInt(
+                3,
+            ),
+        ],
+    },
+}

@@ -1,7 +1,0 @@
----
-source: src/parser/tests.rs
-expression: parse(&input)
----
-expected TOK_LPAREN, found TOK_LBRACE
-1 |  fn f {}
-  |       ^

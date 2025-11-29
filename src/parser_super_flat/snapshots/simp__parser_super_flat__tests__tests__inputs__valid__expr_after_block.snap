@@ -1,0 +1,13 @@
+---
+source: src/parser_super_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr {
+    inner: ExprBlock {
+        tail: None,
+        body: [],
+    },
+}
+ExprInt(
+    0,
+)

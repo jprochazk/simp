@@ -1,0 +1,13 @@
+---
+source: src/parser/tests.rs
+expression: parse(&input)
+---
+ExprBlock {
+    inner: Block {
+        body: [],
+        tail: None,
+    },
+}
+ExprInt {
+    value: 0,
+}

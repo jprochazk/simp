@@ -1,7 +1,0 @@
----
-source: src/parser/tests.rs
-expression: parse(&input)
----
-invalid integer
-1 |  0000
-  |  ^^^^

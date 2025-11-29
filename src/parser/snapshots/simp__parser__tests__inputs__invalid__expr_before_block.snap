@@ -1,7 +1,0 @@
----
-source: src/parser/tests.rs
-expression: parse(&input)
----
-expected a semicolon, got TOK_LBRACE
-2 |  {}
-  |  ^

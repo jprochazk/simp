@@ -1,7 +1,0 @@
----
-source: src/parser/tests.rs
-expression: parse(&input)
----
-expected OP_EQ, found LIT_INT
-1 |  let v 0;
-  |        ^

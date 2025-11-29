@@ -1,0 +1,163 @@
+---
+source: src/parser_super_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr {
+    inner: ExprBlock {
+        tail: None,
+        body: [],
+    },
+}
+StmtExpr {
+    inner: ExprBlock {
+        tail: Some(
+            ExprInt(
+                0,
+            ),
+        ),
+        body: [],
+    },
+}
+StmtExpr {
+    inner: ExprBlock {
+        tail: Some(
+            ExprInt(
+                1,
+            ),
+        ),
+        body: [
+            StmtExpr {
+                inner: ExprInt(
+                    0,
+                ),
+            },
+        ],
+    },
+}
+StmtExpr {
+    inner: ExprBlock {
+        tail: Some(
+            ExprBlock {
+                tail: None,
+                body: [],
+            },
+        ),
+        body: [],
+    },
+}
+StmtExpr {
+    inner: ExprBlock {
+        tail: Some(
+            ExprBlock {
+                tail: None,
+                body: [],
+            },
+        ),
+        body: [
+            StmtExpr {
+                inner: ExprBlock {
+                    tail: None,
+                    body: [],
+                },
+            },
+        ],
+    },
+}
+StmtExpr {
+    inner: ExprBlock {
+        tail: Some(
+            ExprBlock {
+                tail: Some(
+                    ExprInt(
+                        0,
+                    ),
+                ),
+                body: [],
+            },
+        ),
+        body: [],
+    },
+}
+StmtExpr {
+    inner: ExprBlock {
+        tail: Some(
+            ExprBlock {
+                tail: Some(
+                    ExprInt(
+                        1,
+                    ),
+                ),
+                body: [],
+            },
+        ),
+        body: [
+            StmtExpr {
+                inner: ExprBlock {
+                    tail: Some(
+                        ExprInt(
+                            0,
+                        ),
+                    ),
+                    body: [],
+                },
+            },
+        ],
+    },
+}
+StmtExpr {
+    inner: ExprBlock {
+        tail: Some(
+            ExprBlock {
+                tail: Some(
+                    ExprInt(
+                        1,
+                    ),
+                ),
+                body: [
+                    StmtExpr {
+                        inner: ExprInt(
+                            0,
+                        ),
+                    },
+                ],
+            },
+        ),
+        body: [],
+    },
+}
+ExprBlock {
+    tail: Some(
+        ExprBlock {
+            tail: Some(
+                ExprInt(
+                    2,
+                ),
+            ),
+            body: [
+                StmtExpr {
+                    inner: ExprInt(
+                        1,
+                    ),
+                },
+            ],
+        },
+    ),
+    body: [
+        StmtExpr {
+            inner: ExprBlock {
+                tail: Some(
+                    ExprInt(
+                        1,
+                    ),
+                ),
+                body: [
+                    StmtExpr {
+                        inner: ExprInt(
+                            0,
+                        ),
+                    },
+                ],
+            },
+        },
+    ],
+}

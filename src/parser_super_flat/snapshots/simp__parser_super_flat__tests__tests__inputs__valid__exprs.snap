@@ -1,0 +1,144 @@
+---
+source: src/parser_super_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr {
+    inner: ExprBinary {
+        op: Or,
+        lhs: ExprIdent(
+            "or",
+        ),
+        rhs: ExprBinary {
+            op: And,
+            lhs: ExprBinary {
+                op: And,
+                lhs: ExprIdent(
+                    "and0",
+                ),
+                rhs: ExprIdent(
+                    "and0",
+                ),
+            },
+            rhs: ExprIdent(
+                "and1",
+            ),
+        },
+    },
+}
+StmtExpr {
+    inner: ExprBinary {
+        op: And,
+        lhs: ExprIdent(
+            "and",
+        ),
+        rhs: ExprBinary {
+            op: Equal,
+            lhs: ExprBinary {
+                op: Equal,
+                lhs: ExprIdent(
+                    "eq0",
+                ),
+                rhs: ExprIdent(
+                    "eq0",
+                ),
+            },
+            rhs: ExprIdent(
+                "eq1",
+            ),
+        },
+    },
+}
+StmtExpr {
+    inner: ExprBinary {
+        op: Equal,
+        lhs: ExprIdent(
+            "eq",
+        ),
+        rhs: ExprBinary {
+            op: LessThan,
+            lhs: ExprBinary {
+                op: LessThan,
+                lhs: ExprIdent(
+                    "ord0",
+                ),
+                rhs: ExprIdent(
+                    "ord0",
+                ),
+            },
+            rhs: ExprIdent(
+                "ord1",
+            ),
+        },
+    },
+}
+StmtExpr {
+    inner: ExprBinary {
+        op: LessThan,
+        lhs: ExprIdent(
+            "ord",
+        ),
+        rhs: ExprBinary {
+            op: Add,
+            lhs: ExprBinary {
+                op: Add,
+                lhs: ExprIdent(
+                    "add0",
+                ),
+                rhs: ExprIdent(
+                    "add0",
+                ),
+            },
+            rhs: ExprIdent(
+                "add1",
+            ),
+        },
+    },
+}
+StmtExpr {
+    inner: ExprBinary {
+        op: Add,
+        lhs: ExprIdent(
+            "add",
+        ),
+        rhs: ExprBinary {
+            op: Multiply,
+            lhs: ExprBinary {
+                op: Multiply,
+                lhs: ExprIdent(
+                    "mul0",
+                ),
+                rhs: ExprIdent(
+                    "mul0",
+                ),
+            },
+            rhs: ExprIdent(
+                "mul1",
+            ),
+        },
+    },
+}
+StmtExpr {
+    inner: ExprBinary {
+        op: Multiply,
+        lhs: ExprIdent(
+            "mul",
+        ),
+        rhs: ExprUnary {
+            op: Minus,
+            inner: ExprIdent(
+                "unary",
+            ),
+        },
+    },
+}
+StmtExpr {
+    inner: ExprUnary {
+        op: Minus,
+        inner: ExprCall {
+            callee: ExprIdent(
+                "call",
+            ),
+            args: [],
+        },
+    },
+}

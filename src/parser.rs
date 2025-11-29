@@ -317,7 +317,7 @@ fn parse_expr_int(c: &mut Cursor) -> Result<Expr> {
     let token = c.must(LIT_INT)?;
     let lexeme = c.lexeme(token);
     if lexeme.starts_with('0') && lexeme.len() > 1 {
-        return error(format!("invalid integer"), token.span).into();
+        return error("invalid integer", token.span).into();
     }
     let value: i64 = lexeme
         .parse()

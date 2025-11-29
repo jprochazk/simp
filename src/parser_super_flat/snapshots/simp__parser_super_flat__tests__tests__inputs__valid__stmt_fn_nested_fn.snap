@@ -1,0 +1,25 @@
+---
+source: src/parser_super_flat/tests.rs
+expression: parse(&input)
+---
+StmtFn {
+    name: ExprIdent(
+        "outer",
+    ),
+    body: ExprBlock {
+        tail: None,
+        body: [
+            StmtFn {
+                name: ExprIdent(
+                    "inner",
+                ),
+                body: ExprBlock {
+                    tail: None,
+                    body: [],
+                },
+                params: [],
+            },
+        ],
+    },
+    params: [],
+}

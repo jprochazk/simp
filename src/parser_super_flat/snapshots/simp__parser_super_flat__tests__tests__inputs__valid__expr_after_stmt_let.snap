@@ -1,0 +1,15 @@
+---
+source: src/parser_super_flat/tests.rs
+expression: parse(&input)
+---
+StmtLet {
+    name: ExprIdent(
+        "v",
+    ),
+    value: ExprInt(
+        0,
+    ),
+}
+ExprInt(
+    0,
+)

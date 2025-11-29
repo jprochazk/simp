@@ -1,0 +1,9 @@
+or || and0 && and0 && and1;
+and && eq0 == eq0 == eq1;
+eq == ord0 < ord0 < ord1;
+ord < add0 + add0 + add1;
+add + mul0 * mul0 * mul1;
+mul * -unary;
+-call();
+
+

@@ -18,7 +18,7 @@ fn parse(code: &str) -> String {
     }
 }
 
-#[glob_test::glob("./inputs/**/*.simp")]
+#[glob_test::glob("../../tests/inputs/**/*.simp")]
 fn test_parse(path: &Path) {
     let input = std::fs::read_to_string(path).unwrap();
     insta::assert_snapshot!(parse(&input));

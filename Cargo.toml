@@ -4,11 +4,20 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+bumpalo = { version = "3.19.0", features = ["collections"] }
+hashbrown = "0.16.1"
 logos = "0.15.1"
+rustc-hash = "2.1.1"
 
 [workspace]
 members = ["web"]
 
 [dev-dependencies]
+criterion = "0.5"
 glob_test = "0.1.0"
 insta = "1.43.1"
+
+[[bench]]
+name = "parser_bench"
+harness = false
+
