@@ -1,0 +1,65 @@
+---
+source: src/parser_bump/tests.rs
+expression: parse(&input)
+---
+ExprIf {
+    branches: [
+        IfBranch {
+            cond: ExprInt {
+                value: 0,
+            },
+            body: Block {
+                body: [],
+                tail: None,
+            },
+        },
+    ],
+    tail: None,
+}
+ExprIf {
+    branches: [
+        IfBranch {
+            cond: ExprInt {
+                value: 0,
+            },
+            body: Block {
+                body: [],
+                tail: None,
+            },
+        },
+    ],
+    tail: Some(
+        Block {
+            body: [],
+            tail: None,
+        },
+    ),
+}
+ExprIf {
+    branches: [
+        IfBranch {
+            cond: ExprInt {
+                value: 0,
+            },
+            body: Block {
+                body: [],
+                tail: None,
+            },
+        },
+        IfBranch {
+            cond: ExprInt {
+                value: 0,
+            },
+            body: Block {
+                body: [],
+                tail: None,
+            },
+        },
+    ],
+    tail: Some(
+        Block {
+            body: [],
+            tail: None,
+        },
+    ),
+}

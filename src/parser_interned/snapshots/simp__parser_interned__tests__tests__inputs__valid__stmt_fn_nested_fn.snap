@@ -1,0 +1,25 @@
+---
+source: src/parser_interned/tests.rs
+expression: parse(&input)
+---
+StmtFn {
+    name: IdentId {
+        raw: 1,
+    },
+    params: [],
+    body: Block {
+        body: [
+            StmtFn {
+                name: IdentId {
+                    raw: 2,
+                },
+                params: [],
+                body: Block {
+                    body: [],
+                    tail: None,
+                },
+            },
+        ],
+        tail: None,
+    },
+}

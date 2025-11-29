@@ -1,0 +1,32 @@
+---
+source: src/parser_bump/tests.rs
+expression: parse(&input)
+---
+StmtFn {
+    name: IdentId {
+        raw: 1,
+    },
+    params: [
+        IdentId {
+            raw: 2,
+        },
+    ],
+    body: Block {
+        body: [],
+        tail: None,
+    },
+}
+StmtFn {
+    name: IdentId {
+        raw: 1,
+    },
+    params: [
+        IdentId {
+            raw: 2,
+        },
+    ],
+    body: Block {
+        body: [],
+        tail: None,
+    },
+}

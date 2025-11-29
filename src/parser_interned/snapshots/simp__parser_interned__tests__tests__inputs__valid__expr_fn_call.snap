@@ -1,0 +1,72 @@
+---
+source: src/parser_interned/tests.rs
+expression: parse(&input)
+---
+ExprCall {
+    callee: ExprIdent {
+        name: IdentId {
+            raw: 1,
+        },
+    },
+    args: [],
+}
+ExprCall {
+    callee: ExprIdent {
+        name: IdentId {
+            raw: 1,
+        },
+    },
+    args: [
+        ExprInt {
+            value: 1,
+        },
+    ],
+}
+ExprCall {
+    callee: ExprIdent {
+        name: IdentId {
+            raw: 1,
+        },
+    },
+    args: [
+        ExprInt {
+            value: 1,
+        },
+    ],
+}
+ExprCall {
+    callee: ExprIdent {
+        name: IdentId {
+            raw: 1,
+        },
+    },
+    args: [
+        ExprInt {
+            value: 1,
+        },
+        ExprInt {
+            value: 2,
+        },
+        ExprInt {
+            value: 3,
+        },
+    ],
+}
+ExprCall {
+    callee: ExprIdent {
+        name: IdentId {
+            raw: 1,
+        },
+    },
+    args: [
+        ExprInt {
+            value: 1,
+        },
+        ExprInt {
+            value: 2,
+        },
+        ExprInt {
+            value: 3,
+        },
+    ],
+}

@@ -1,0 +1,19 @@
+---
+source: src/parser_bump/tests.rs
+expression: parse(&input)
+---
+ExprStr {
+    value: StrId {
+        raw: 1,
+    },
+}
+ExprStr {
+    value: StrId {
+        raw: 2,
+    },
+}
+ExprStr {
+    value: StrId {
+        raw: 3,
+    },
+}

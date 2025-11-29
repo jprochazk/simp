@@ -1,0 +1,176 @@
+---
+source: src/parser_bump/tests.rs
+expression: parse(&input)
+---
+ExprBinary {
+    lhs: ExprIdent {
+        name: IdentId {
+            raw: 1,
+        },
+    },
+    op: Or,
+    rhs: ExprBinary {
+        lhs: ExprBinary {
+            lhs: ExprIdent {
+                name: IdentId {
+                    raw: 2,
+                },
+            },
+            op: And,
+            rhs: ExprIdent {
+                name: IdentId {
+                    raw: 2,
+                },
+            },
+        },
+        op: And,
+        rhs: ExprIdent {
+            name: IdentId {
+                raw: 3,
+            },
+        },
+    },
+}
+ExprBinary {
+    lhs: ExprIdent {
+        name: IdentId {
+            raw: 4,
+        },
+    },
+    op: And,
+    rhs: ExprBinary {
+        lhs: ExprBinary {
+            lhs: ExprIdent {
+                name: IdentId {
+                    raw: 5,
+                },
+            },
+            op: Equal,
+            rhs: ExprIdent {
+                name: IdentId {
+                    raw: 5,
+                },
+            },
+        },
+        op: Equal,
+        rhs: ExprIdent {
+            name: IdentId {
+                raw: 6,
+            },
+        },
+    },
+}
+ExprBinary {
+    lhs: ExprIdent {
+        name: IdentId {
+            raw: 7,
+        },
+    },
+    op: Equal,
+    rhs: ExprBinary {
+        lhs: ExprBinary {
+            lhs: ExprIdent {
+                name: IdentId {
+                    raw: 8,
+                },
+            },
+            op: LessThan,
+            rhs: ExprIdent {
+                name: IdentId {
+                    raw: 8,
+                },
+            },
+        },
+        op: LessThan,
+        rhs: ExprIdent {
+            name: IdentId {
+                raw: 9,
+            },
+        },
+    },
+}
+ExprBinary {
+    lhs: ExprIdent {
+        name: IdentId {
+            raw: 10,
+        },
+    },
+    op: LessThan,
+    rhs: ExprBinary {
+        lhs: ExprBinary {
+            lhs: ExprIdent {
+                name: IdentId {
+                    raw: 11,
+                },
+            },
+            op: Add,
+            rhs: ExprIdent {
+                name: IdentId {
+                    raw: 11,
+                },
+            },
+        },
+        op: Add,
+        rhs: ExprIdent {
+            name: IdentId {
+                raw: 12,
+            },
+        },
+    },
+}
+ExprBinary {
+    lhs: ExprIdent {
+        name: IdentId {
+            raw: 13,
+        },
+    },
+    op: Add,
+    rhs: ExprBinary {
+        lhs: ExprBinary {
+            lhs: ExprIdent {
+                name: IdentId {
+                    raw: 14,
+                },
+            },
+            op: Multiply,
+            rhs: ExprIdent {
+                name: IdentId {
+                    raw: 14,
+                },
+            },
+        },
+        op: Multiply,
+        rhs: ExprIdent {
+            name: IdentId {
+                raw: 15,
+            },
+        },
+    },
+}
+ExprBinary {
+    lhs: ExprIdent {
+        name: IdentId {
+            raw: 16,
+        },
+    },
+    op: Multiply,
+    rhs: ExprUnary {
+        rhs: ExprIdent {
+            name: IdentId {
+                raw: 17,
+            },
+        },
+        op: Minus,
+    },
+}
+ExprUnary {
+    rhs: ExprCall {
+        callee: ExprIdent {
+            name: IdentId {
+                raw: 18,
+            },
+        },
+        args: [],
+    },
+    op: Minus,
+}

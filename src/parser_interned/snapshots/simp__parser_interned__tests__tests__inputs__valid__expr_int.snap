@@ -1,0 +1,10 @@
+---
+source: src/parser_interned/tests.rs
+expression: parse(&input)
+---
+ExprInt {
+    value: 0,
+}
+ExprInt {
+    value: 1234,
+}

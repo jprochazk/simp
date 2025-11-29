@@ -3,16 +3,14 @@ use std::{
     mem::{transmute, transmute_copy},
 };
 
-use rustc_hash::FxBuildHasher;
-
 use crate::intern::{Intern, Interner, simple::SimpleInterner};
 
 pub struct Ast {
     root: Root,
     nodes: Vec<Packed>,
-    ints: SimpleInterner<IntId, i64, FxBuildHasher>,
-    strings: Interner<StrId, FxBuildHasher>,
-    idents: Interner<IdentId, FxBuildHasher>,
+    ints: SimpleInterner<IntId, i64>,
+    strings: Interner<StrId>,
+    idents: Interner<IdentId>,
 }
 
 impl Ast {
@@ -44,9 +42,9 @@ impl Ast {
 
 pub struct AstBuilder {
     nodes: Vec<Packed>,
-    ints: SimpleInterner<IntId, i64, FxBuildHasher>,
-    strings: Interner<StrId, FxBuildHasher>,
-    idents: Interner<IdentId, FxBuildHasher>,
+    ints: SimpleInterner<IntId, i64>,
+    strings: Interner<StrId>,
+    idents: Interner<IdentId>,
 }
 
 impl AstBuilder {

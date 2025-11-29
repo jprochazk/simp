@@ -1,0 +1,12 @@
+---
+source: src/parser_bump/tests.rs
+expression: parse(&input)
+---
+StmtLet {
+    name: IdentId {
+        raw: 1,
+    },
+    value: ExprInt {
+        value: 0,
+    },
+}
