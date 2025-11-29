@@ -6,7 +6,6 @@
 # ]
 # ///
 
-import argparse
 import csv
 import os
 import subprocess
@@ -25,33 +24,141 @@ KINDS = [
 
 
 def run(cmd, **kwargs):
-    print("+", " ".join(cmd))
     subprocess.run(cmd, check=True, **kwargs)
 
 
-def build_bench(bin_name):
-    run(["cargo", "build", "--profile", "bench"])
+def build_bench():
+    run(["cargo", "build", "--release"])
+    return "target/release/simp"
 
-    path = os.path.join("target", "bench", "simp")
+
+SNIPPETS = [
+    # Simple function definitions
+    "fn simple() {}",
+    "fn with_params(a, b, c) { a }",
+    "fn nested() { fn inner() { 42 } }",
+
+    # Let statements
+    "let x = 0;",
+    "let y = add(1, 2);",
+    "let z = if 1 { 10 } else { 20 };",
+
+    # Function calls
+    "f();",
+    "g(1, 2, 3);",
+    "h(a, b, c, d, e, f);",
+
+    # If expressions
+    "if 0 {}",
+    "if x { y } else { z }",
+    "if a { b } else if c { d } else { e }",
+
+    # Blocks
+    "{}",
+    "{ 0 }",
+    "{ let a = 1; a }",
+    "{ { { nested } } }",
+
+    # Binary operations
+    "a + b;",
+    "x * y + z;",
+    "a && b || c;",
+    "x == y && z != w;",
+    "a < b && c > d;",
+
+    # Complex expressions
+    "or || and0 && and0 && and1;",
+    "and && eq0 == eq0 == eq1;",
+    "eq == ord0 < ord0 < ord1;",
+    "ord < add0 + add0 + add1;",
+    "add + mul0 * mul0 * mul1;",
+    "mul * -unary;",
+    "-call();",
+
+    # Functions with bodies
+    """fn fibonacci(n) {
+    if n < 2 {
+        n
+    } else {
+        fibonacci(n - 1) + fibonacci(n - 2)
+    }
+}""",
+    """fn factorial(n) {
+    if n == 0 {
+        1
+    } else {
+        n * factorial(n - 1)
+    }
+}""",
+    # Complex nested structures
+    """fn complex(a, b, c) {
+    let x = a + b;
+    let y = x * c;
+    if y > 0 {
+        let result = compute(y);
+        result
+    } else {
+        -y
+    }
+}""",
+]
+
+
+def generate_test_file(path, target_bytes):
+    """Generate a test file with valid simp code up to target_bytes."""
+    content = []
+    total_bytes = 0
+
+    while total_bytes < target_bytes:
+        for snippet in SNIPPETS:
+            content.append(snippet)
+            content.append("\n\n")
+            total_bytes += len(snippet) + 2
+
+            if total_bytes >= target_bytes:
+                break
+
+    full_content = "".join(content)
+
+    with open(path, "w") as f:
+        f.write(full_content)
+
+    size = len(full_content)
+    if size >= 1024 * 1024:
+        size_str = f"{size / (1024 * 1024):.2f} MiB"
+    elif size >= 1024:
+        size_str = f"{size / 1024:.2f} KiB"
+    else:
+        size_str = f"{size} bytes"
+
+    print(f"Generated {path} with {size_str}")
     return path
 
 
-def collect_input_files(input_dir, pattern):
-    root = Path(input_dir)
-    if not root.is_dir():
-        raise SystemExit(f"--input-dir is not a directory: {input_dir}")
+def generate_input_files(output_dir):
+    """Generate test files in 10x increments up to 10 MiB."""
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    files = sorted(
-        str(p) for p in root.glob(pattern) if p.is_file()
-    )
-    if not files:
-        raise SystemExit(
-            f"No input files found in {input_dir!r} with pattern {pattern!r}"
-        )
+    KB = 1024
+    MB = 1024 * KB
 
-    print(f"Found {len(files)} input file(s):")
-    for f in files:
-        print("  -", f)
+    sizes = [
+        ("input_1kb.simp", 1 * KB),
+        ("input_10kb.simp", 10 * KB),
+        ("input_100kb.simp", 100 * KB),
+        ("input_1mb.simp", 1 * MB),
+        ("input_10mb.simp", 10 * MB),
+        ("input_100mb.simp", 100 * MB),
+    ]
+
+    files = []
+    for filename, target_bytes in sizes:
+        path = output_dir / filename
+        generate_test_file(path, target_bytes)
+        files.append(str(path))
+
+    print(f"\nGenerated {len(files)} test files in {output_dir}")
     return files
 
 
@@ -202,38 +309,14 @@ def write_csv(results, path):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description=(
-            "measure max RSS/runtime/page faults, and plot results"
-        )
-    )
-    parser.add_argument(
-        "--input-dir",
-        required=True,
-        help="Directory containing input files.",
-    )
-    parser.add_argument(
-        "--pattern",
-        default="*",
-        help="Glob pattern within --input-dir (default: '*').",
-    )
-    parser.add_argument(
-        "--output-prefix",
-        default="bench_profile",
-        help="Prefix for CSV and PNG output files (default: bench_profile).",
-    )
-
-    args = parser.parse_args()
-
+    output_dir = "benches/inputs"
+    input_files = generate_input_files(output_dir)
     binary_path = build_bench()
-    input_files = collect_input_files(args.input_dir, args.pattern)
-
-    print("\nKINDS:", ", ".join(KINDS))
 
     results = []
     for kind in KINDS:
         for input_file in input_files:
-            print(f"\n=== Running kind={kind} input={input_file} ===")
+            print(f"\n=== Running parser={kind} input={input_file} ===")
             res = run_job(binary_path, kind, input_file)
             results.append(res)
             print(
@@ -242,8 +325,8 @@ def main():
                 f"maj_pf={res['maj_pf']}, min_pf={res['min_pf']}"
             )
 
-    plot_path = f"{args.output_prefix}.png"
-    csv_path = f"{args.output_prefix}.csv"
+    plot_path = "bench.png"
+    csv_path = "bench.csv"
     plot_results(results, plot_path)
     write_csv(results, csv_path)
 
