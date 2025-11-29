@@ -6,7 +6,6 @@
 # ]
 # ///
 
-import csv
 import os
 import subprocess
 import tempfile
@@ -319,32 +318,6 @@ def plot_results(results, output_prefix):
     plt.close()
 
 
-def write_csv(results, path):
-    if not results:
-        return
-
-    enrich_results(results)
-
-    fieldnames = [
-        "kind",
-        "input_file",
-        "input_size_bytes",
-        "input_size_mib",
-        "runtime_sec",
-        "max_rss_kb",
-        "max_rss_mib",
-        "maj_pf",
-        "min_pf",
-        "pf_total",
-    ]
-    with open(path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        for r in results:
-            writer.writerow({k: r.get(k) for k in fieldnames})
-    print(f"Wrote CSV to {path}")
-
-
 def main():
     output_dir = "benches/inputs"
     input_files = generate_input_files(output_dir)
@@ -363,9 +336,7 @@ def main():
             )
 
     output_prefix = "bench"
-    csv_path = "bench.csv"
     plot_results(results, output_prefix)
-    write_csv(results, csv_path)
 
 
 if __name__ == "__main__":
