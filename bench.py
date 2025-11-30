@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 KINDS = [
     "parser_tree",
     "parser_interned",
-    "parser_bump",
     "parser_flat",
+    "parser_bump",
     "parser_super_flat",
 ]
 
@@ -33,40 +33,27 @@ def build_bench():
 
 
 SNIPPETS = [
-    # Simple function definitions
     "fn simple() {}",
     "fn with_params(a, b, c) { a }",
     "fn nested() { fn inner() { 42 } }",
-
-    # Let statements
     "let x = 0;",
     "let y = add(1, 2);",
     "let z = if 1 { 10 } else { 20 };",
-
-    # Function calls
     "f();",
     "g(1, 2, 3);",
     "h(a, b, c, d, e, f);",
-
-    # If expressions
     "if 0 {}",
     "if x { y } else { z }",
     "if a { b } else if c { d } else { e }",
-
-    # Blocks
     "{}",
     "{ 0 }",
     "{ let a = 1; a }",
     "{ { { nested } } }",
-
-    # Binary operations
     "a + b;",
     "x * y + z;",
     "a && b || c;",
     "x == y && z != w;",
     "a < b && c > d;",
-
-    # Complex expressions
     "or || and0 && and0 && and1;",
     "and && eq0 == eq0 == eq1;",
     "eq == ord0 < ord0 < ord1;",
@@ -74,8 +61,6 @@ SNIPPETS = [
     "add + mul0 * mul0 * mul1;",
     "mul * -unary;",
     "-call();",
-
-    # Functions with bodies
     """fn fibonacci(n) {
     if n < 2 {
         n
@@ -90,7 +75,6 @@ SNIPPETS = [
         n * factorial(n - 1)
     }
 }""",
-    # Complex nested structures
     """fn complex(a, b, c) {
     let x = a + b;
     let y = x * c;
@@ -102,7 +86,6 @@ SNIPPETS = [
     }
 }""",
 ]
-
 
 def generate_test_file(path, target_bytes):
     """Generate a test file with valid simp code up to target_bytes."""
@@ -249,8 +232,8 @@ def enrich_results(results):
         r["input_size_mib"] = r["input_size_bytes"] / (1024 * 1024)
         r["max_rss_mib"] = r["max_rss_kb"] / 1024.0
         r["pf_total"] = r["maj_pf"] + r["min_pf"]
-        runtime_ms = r["runtime_sec"] * 1000
-        r["lines_per_ms"] = r["line_count"] / runtime_ms if runtime_ms > 0 else 0
+        r["loc_per_s"] = r["line_count"] / r["runtime_sec"] if r["runtime_sec"] > 0 else 0
+        r["mloc_per_s"] = r["loc_per_s"] / 1_000_000
 
 
 def plot_results(results, output_prefix):
@@ -342,7 +325,7 @@ def plot_results(results, output_prefix):
     print(f"Wrote page faults plot to {pf_path}")
     plt.close()
 
-    # Plot 4: Lines Per Millisecond vs Input Size
+    # Plot 4: Million Lines Per Second vs Input Size
     plt.figure(figsize=(10, 7))
     for kind in kinds:
         xs = []
@@ -352,21 +335,22 @@ def plot_results(results, output_prefix):
             if r["kind"] != kind:
                 continue
             xs.append(r["input_size_mib"])
-            ys.append(r["lines_per_ms"])
+            ys.append(r["mloc_per_s"])
 
         sorted_data = sorted(zip(xs, ys))
         xs, ys = zip(*sorted_data) if sorted_data else ([], [])
         plt.plot(xs, ys, marker='o', label=kind, linewidth=2, markersize=6)
 
     plt.xlabel("Input size (MiB)")
-    plt.ylabel("Lines per millisecond")
-    plt.title("Parser Throughput: Lines/ms vs Input Size")
+    plt.ylabel("MLoC/s")
+    plt.title("Parser Throughput: MLoC/s vs Input Size")
+    plt.xscale('log')
     plt.legend(title="Parser")
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     lps_path = f"{output_prefix}_loc.png"
     plt.savefig(lps_path, dpi=200)
-    print(f"Wrote lines/ms plot to {lps_path}")
+    print(f"Wrote mloc/s plot to {lps_path}")
     plt.close()
 
 
@@ -382,11 +366,11 @@ def main():
             res = run_job(binary_path, kind, input_file)
             results.append(res)
             runtime_ms = res['runtime_sec'] * 1000
-            lines_per_ms = res['line_count'] / runtime_ms if runtime_ms > 0 else 0
+            loc_per_s = res['line_count'] / res['runtime_sec'] if res['runtime_sec'] > 0 else 0
             print(
                 f"  lines={res['line_count']}, "
                 f"runtime={res['runtime_sec']:.3f}s ({runtime_ms:.2f}ms), "
-                f"lines/ms={lines_per_ms:.2f}, "
+                f"loc/s={loc_per_s:.2f}, "
                 f"max_rss={res['max_rss_kb']} KB, "
                 f"maj_pf={res['maj_pf']}, min_pf={res['min_pf']}"
             )
