@@ -1,0 +1,72 @@
+---
+source: src/parser_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr(
+    ExprCall {
+        callee: ExprIdent {
+            name: f,
+        },
+        args: [],
+    },
+)
+StmtExpr(
+    ExprCall {
+        callee: ExprIdent {
+            name: f,
+        },
+        args: [
+            ExprInt {
+                value: 1,
+            },
+        ],
+    },
+)
+StmtExpr(
+    ExprCall {
+        callee: ExprIdent {
+            name: f,
+        },
+        args: [
+            ExprInt {
+                value: 1,
+            },
+        ],
+    },
+)
+StmtExpr(
+    ExprCall {
+        callee: ExprIdent {
+            name: f,
+        },
+        args: [
+            ExprInt {
+                value: 1,
+            },
+            ExprInt {
+                value: 2,
+            },
+            ExprInt {
+                value: 3,
+            },
+        ],
+    },
+)
+StmtExpr(
+    ExprCall {
+        callee: ExprIdent {
+            name: f,
+        },
+        args: [
+            ExprInt {
+                value: 1,
+            },
+            ExprInt {
+                value: 2,
+            },
+            ExprInt {
+                value: 3,
+            },
+        ],
+    },
+)

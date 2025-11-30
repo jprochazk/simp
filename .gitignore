@@ -4,6 +4,7 @@
 
 
 # bench stuff
+bench_loc.png
 bench_pagefaults.png
 bench_rss.png
 bench_runtime.png

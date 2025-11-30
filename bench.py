@@ -18,6 +18,7 @@ KINDS = [
     "parser_tree",
     "parser_interned",
     "parser_bump",
+    "parser_flat",
     "parser_super_flat",
 ]
 
@@ -171,24 +172,33 @@ def run_job(binary, kind, input_file):
     """
     Run one job:
 
-        /usr/bin/time -f "%e %M %F %R" <binary> <kind> <input_file>
+        /usr/bin/time -f "%M %F %R" <binary> <kind> <input_file>
 
     Returns a dict with metrics.
+    Program reports its own runtime via stderr.
     """
     if not os.path.exists(input_file):
         raise SystemExit(f"Input file does not exist: {input_file}")
 
     input_size_bytes = os.path.getsize(input_file)
 
+    # Count lines in the input file
+    with open(input_file, 'r') as f:
+        line_count = sum(1 for _ in f)
+
     # Adjust this path if your `time` binary is elsewhere.
     time_prog = "/usr/bin/time"
 
+    # `/usr/bin/time` makes it easy to report memory stats,
+    # but it has poor runtime precision.
+    # We also don't care about "process overhead", so we
+    # have the program measure and report its own runtime.
     with tempfile.NamedTemporaryFile(mode="r+") as tf:
         time_cmd = [
             "taskset", "-c", "0",
             time_prog,
             "-f",
-            "%e %M %F %R",  # runtime(s), maxRSS(kb), majPF, minPF
+            "%M %F %R",  # maxRSS(kb), majPF, minPF
             "-o",
             tf.name,
             binary,
@@ -196,25 +206,37 @@ def run_job(binary, kind, input_file):
             input_file,
         ]
 
-        run(time_cmd)
+        # Capture stderr to get the program's runtime measurement
+        result = subprocess.run(time_cmd, check=True, capture_output=True, text=True)
 
+        # Parse runtime from stderr
+        runtime_sec = None
+        for line in result.stderr.splitlines():
+            if line.startswith("BENCH_RUNTIME_SEC:"):
+                runtime_sec = float(line.split(":", 1)[1].strip())
+                break
+
+        if runtime_sec is None:
+            raise RuntimeError("Failed to parse BENCH_RUNTIME_SEC from program output")
+
+        # Read memory and page fault stats from /usr/bin/time
         tf.seek(0)
         line = tf.read().strip()
         parts = line.split()
-        if len(parts) != 4:
+        if len(parts) != 3:
             raise RuntimeError(
                 f"Unexpected /usr/bin/time output format: {line!r}"
             )
 
-        runtime_sec = float(parts[0])
-        max_rss_kb = int(parts[1])
-        maj_pf = int(parts[2])
-        min_pf = int(parts[3])
+        max_rss_kb = int(parts[0])
+        maj_pf = int(parts[1])
+        min_pf = int(parts[2])
 
     return {
         "kind": kind,
         "input_file": input_file,
         "input_size_bytes": input_size_bytes,
+        "line_count": line_count,
         "runtime_sec": runtime_sec,
         "max_rss_kb": max_rss_kb,
         "maj_pf": maj_pf,
@@ -227,6 +249,8 @@ def enrich_results(results):
         r["input_size_mib"] = r["input_size_bytes"] / (1024 * 1024)
         r["max_rss_mib"] = r["max_rss_kb"] / 1024.0
         r["pf_total"] = r["maj_pf"] + r["min_pf"]
+        runtime_ms = r["runtime_sec"] * 1000
+        r["lines_per_ms"] = r["line_count"] / runtime_ms if runtime_ms > 0 else 0
 
 
 def plot_results(results, output_prefix):
@@ -318,6 +342,33 @@ def plot_results(results, output_prefix):
     print(f"Wrote page faults plot to {pf_path}")
     plt.close()
 
+    # Plot 4: Lines Per Millisecond vs Input Size
+    plt.figure(figsize=(10, 7))
+    for kind in kinds:
+        xs = []
+        ys = []
+
+        for r in results:
+            if r["kind"] != kind:
+                continue
+            xs.append(r["input_size_mib"])
+            ys.append(r["lines_per_ms"])
+
+        sorted_data = sorted(zip(xs, ys))
+        xs, ys = zip(*sorted_data) if sorted_data else ([], [])
+        plt.plot(xs, ys, marker='o', label=kind, linewidth=2, markersize=6)
+
+    plt.xlabel("Input size (MiB)")
+    plt.ylabel("Lines per millisecond")
+    plt.title("Parser Throughput: Lines/ms vs Input Size")
+    plt.legend(title="Parser")
+    plt.grid(True, linestyle="--", alpha=0.3)
+    plt.tight_layout()
+    lps_path = f"{output_prefix}_loc.png"
+    plt.savefig(lps_path, dpi=200)
+    print(f"Wrote lines/ms plot to {lps_path}")
+    plt.close()
+
 
 def main():
     output_dir = "benches/inputs"
@@ -330,8 +381,12 @@ def main():
             print(f"\n=== Running parser={kind} input={input_file} ===")
             res = run_job(binary_path, kind, input_file)
             results.append(res)
+            runtime_ms = res['runtime_sec'] * 1000
+            lines_per_ms = res['line_count'] / runtime_ms if runtime_ms > 0 else 0
             print(
-                f"  runtime={res['runtime_sec']:.3f}s, "
+                f"  lines={res['line_count']}, "
+                f"runtime={res['runtime_sec']:.3f}s ({runtime_ms:.2f}ms), "
+                f"lines/ms={lines_per_ms:.2f}, "
                 f"max_rss={res['max_rss_kb']} KB, "
                 f"maj_pf={res['maj_pf']}, min_pf={res['min_pf']}"
             )

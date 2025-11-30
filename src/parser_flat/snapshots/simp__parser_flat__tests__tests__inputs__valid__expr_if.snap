@@ -1,0 +1,69 @@
+---
+source: src/parser_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr(
+    ExprIf {
+        branches: [
+            IfBranch {
+                cond: ExprInt {
+                    value: 0,
+                },
+                body: ExprBlock {
+                    body: [],
+                    tail: None,
+                },
+            },
+        ],
+        tail: None,
+    },
+)
+StmtExpr(
+    ExprIf {
+        branches: [
+            IfBranch {
+                cond: ExprInt {
+                    value: 0,
+                },
+                body: ExprBlock {
+                    body: [],
+                    tail: None,
+                },
+            },
+        ],
+        tail: Some(
+            ExprBlock {
+                body: [],
+                tail: None,
+            },
+        ),
+    },
+)
+ExprIf {
+    branches: [
+        IfBranch {
+            cond: ExprInt {
+                value: 0,
+            },
+            body: ExprBlock {
+                body: [],
+                tail: None,
+            },
+        },
+        IfBranch {
+            cond: ExprInt {
+                value: 0,
+            },
+            body: ExprBlock {
+                body: [],
+                tail: None,
+            },
+        },
+    ],
+    tail: Some(
+        ExprBlock {
+            body: [],
+            tail: None,
+        },
+    ),
+}

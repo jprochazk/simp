@@ -10,6 +10,9 @@ pub mod parser_interned;
 pub mod ast_bump;
 pub mod parser_bump;
 
+pub mod ast_flat;
+pub mod parser_flat;
+
 pub mod ast_super_flat;
 pub mod parser_super_flat;
 

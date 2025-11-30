@@ -36,6 +36,16 @@ fn parsers(c: &mut Criterion) {
         )
     });
 
+    group.bench_function("parse_flat", |b| {
+        b.iter_batched(
+            || &input,
+            |input| {
+                let _ = simp::parser_flat::parse(black_box(input)).unwrap();
+            },
+            criterion::BatchSize::PerIteration,
+        )
+    });
+
     group.bench_function("parse_super_flat", |b| {
         b.iter_batched(
             || &input,

@@ -1,0 +1,144 @@
+---
+source: src/parser_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr(
+    ExprBinary {
+        lhs: ExprIdent {
+            name: or,
+        },
+        op: Or,
+        rhs: ExprBinary {
+            lhs: ExprBinary {
+                lhs: ExprIdent {
+                    name: and0,
+                },
+                op: And,
+                rhs: ExprIdent {
+                    name: and0,
+                },
+            },
+            op: And,
+            rhs: ExprIdent {
+                name: and1,
+            },
+        },
+    },
+)
+StmtExpr(
+    ExprBinary {
+        lhs: ExprIdent {
+            name: and,
+        },
+        op: And,
+        rhs: ExprBinary {
+            lhs: ExprBinary {
+                lhs: ExprIdent {
+                    name: eq0,
+                },
+                op: Equal,
+                rhs: ExprIdent {
+                    name: eq0,
+                },
+            },
+            op: Equal,
+            rhs: ExprIdent {
+                name: eq1,
+            },
+        },
+    },
+)
+StmtExpr(
+    ExprBinary {
+        lhs: ExprIdent {
+            name: eq,
+        },
+        op: Equal,
+        rhs: ExprBinary {
+            lhs: ExprBinary {
+                lhs: ExprIdent {
+                    name: ord0,
+                },
+                op: LessThan,
+                rhs: ExprIdent {
+                    name: ord0,
+                },
+            },
+            op: LessThan,
+            rhs: ExprIdent {
+                name: ord1,
+            },
+        },
+    },
+)
+StmtExpr(
+    ExprBinary {
+        lhs: ExprIdent {
+            name: ord,
+        },
+        op: LessThan,
+        rhs: ExprBinary {
+            lhs: ExprBinary {
+                lhs: ExprIdent {
+                    name: add0,
+                },
+                op: Add,
+                rhs: ExprIdent {
+                    name: add0,
+                },
+            },
+            op: Add,
+            rhs: ExprIdent {
+                name: add1,
+            },
+        },
+    },
+)
+StmtExpr(
+    ExprBinary {
+        lhs: ExprIdent {
+            name: add,
+        },
+        op: Add,
+        rhs: ExprBinary {
+            lhs: ExprBinary {
+                lhs: ExprIdent {
+                    name: mul0,
+                },
+                op: Multiply,
+                rhs: ExprIdent {
+                    name: mul0,
+                },
+            },
+            op: Multiply,
+            rhs: ExprIdent {
+                name: mul1,
+            },
+        },
+    },
+)
+StmtExpr(
+    ExprBinary {
+        lhs: ExprIdent {
+            name: mul,
+        },
+        op: Multiply,
+        rhs: ExprUnary {
+            rhs: ExprIdent {
+                name: unary,
+            },
+            op: Minus,
+        },
+    },
+)
+StmtExpr(
+    ExprUnary {
+        rhs: ExprCall {
+            callee: ExprIdent {
+                name: call,
+            },
+            args: [],
+        },
+        op: Minus,
+    },
+)

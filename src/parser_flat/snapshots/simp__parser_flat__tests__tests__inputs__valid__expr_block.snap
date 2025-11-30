@@ -1,0 +1,163 @@
+---
+source: src/parser_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr(
+    ExprBlock {
+        body: [],
+        tail: None,
+    },
+)
+StmtExpr(
+    ExprBlock {
+        body: [],
+        tail: Some(
+            ExprInt {
+                value: 0,
+            },
+        ),
+    },
+)
+StmtExpr(
+    ExprBlock {
+        body: [
+            StmtExpr(
+                ExprInt {
+                    value: 0,
+                },
+            ),
+        ],
+        tail: Some(
+            ExprInt {
+                value: 1,
+            },
+        ),
+    },
+)
+StmtExpr(
+    ExprBlock {
+        body: [],
+        tail: Some(
+            ExprBlock {
+                body: [],
+                tail: None,
+            },
+        ),
+    },
+)
+StmtExpr(
+    ExprBlock {
+        body: [
+            StmtExpr(
+                ExprBlock {
+                    body: [],
+                    tail: None,
+                },
+            ),
+        ],
+        tail: Some(
+            ExprBlock {
+                body: [],
+                tail: None,
+            },
+        ),
+    },
+)
+StmtExpr(
+    ExprBlock {
+        body: [],
+        tail: Some(
+            ExprBlock {
+                body: [],
+                tail: Some(
+                    ExprInt {
+                        value: 0,
+                    },
+                ),
+            },
+        ),
+    },
+)
+StmtExpr(
+    ExprBlock {
+        body: [
+            StmtExpr(
+                ExprBlock {
+                    body: [],
+                    tail: Some(
+                        ExprInt {
+                            value: 0,
+                        },
+                    ),
+                },
+            ),
+        ],
+        tail: Some(
+            ExprBlock {
+                body: [],
+                tail: Some(
+                    ExprInt {
+                        value: 1,
+                    },
+                ),
+            },
+        ),
+    },
+)
+StmtExpr(
+    ExprBlock {
+        body: [],
+        tail: Some(
+            ExprBlock {
+                body: [
+                    StmtExpr(
+                        ExprInt {
+                            value: 0,
+                        },
+                    ),
+                ],
+                tail: Some(
+                    ExprInt {
+                        value: 1,
+                    },
+                ),
+            },
+        ),
+    },
+)
+ExprBlock {
+    body: [
+        StmtExpr(
+            ExprBlock {
+                body: [
+                    StmtExpr(
+                        ExprInt {
+                            value: 0,
+                        },
+                    ),
+                ],
+                tail: Some(
+                    ExprInt {
+                        value: 1,
+                    },
+                ),
+            },
+        ),
+    ],
+    tail: Some(
+        ExprBlock {
+            body: [
+                StmtExpr(
+                    ExprInt {
+                        value: 1,
+                    },
+                ),
+            ],
+            tail: Some(
+                ExprInt {
+                    value: 2,
+                },
+            ),
+        },
+    ),
+}

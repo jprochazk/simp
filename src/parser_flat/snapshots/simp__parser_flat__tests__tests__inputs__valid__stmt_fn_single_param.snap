@@ -1,0 +1,24 @@
+---
+source: src/parser_flat/tests.rs
+expression: parse(&input)
+---
+StmtFn {
+    name: f,
+    params: [
+        a,
+    ],
+    body: ExprBlock {
+        body: [],
+        tail: None,
+    },
+}
+StmtFn {
+    name: f,
+    params: [
+        a,
+    ],
+    body: ExprBlock {
+        body: [],
+        tail: None,
+    },
+}

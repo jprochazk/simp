@@ -1,0 +1,19 @@
+---
+source: src/parser_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr(
+    ExprStr {
+        value: ,
+    },
+)
+StmtExpr(
+    ExprStr {
+        value: asdf,
+    },
+)
+StmtExpr(
+    ExprStr {
+        value: 👽,
+    },
+)

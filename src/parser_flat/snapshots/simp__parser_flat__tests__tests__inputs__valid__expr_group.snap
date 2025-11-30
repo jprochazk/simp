@@ -1,0 +1,17 @@
+---
+source: src/parser_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr(
+    ExprInt {
+        value: 0,
+    },
+)
+StmtExpr(
+    ExprCall {
+        callee: ExprIdent {
+            name: f,
+        },
+        args: [],
+    },
+)

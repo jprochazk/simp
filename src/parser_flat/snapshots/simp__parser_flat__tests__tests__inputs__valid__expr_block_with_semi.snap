@@ -1,0 +1,14 @@
+---
+source: src/parser_flat/tests.rs
+expression: parse(&input)
+---
+StmtExpr(
+    ExprBlock {
+        body: [],
+        tail: None,
+    },
+)
+ExprBlock {
+    body: [],
+    tail: None,
+}
