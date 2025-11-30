@@ -185,6 +185,7 @@ def run_job(binary, kind, input_file):
 
     with tempfile.NamedTemporaryFile(mode="r+") as tf:
         time_cmd = [
+            "taskset", "-c", "0",
             time_prog,
             "-f",
             "%e %M %F %R",  # runtime(s), maxRSS(kb), majPF, minPF
