@@ -133,7 +133,7 @@ pub struct ExprBinary<'a> {
     pub rhs: Expr<'a>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum BinaryOp {
     /// `+`
     Add,
@@ -183,7 +183,7 @@ pub struct ExprUnary<'a> {
     pub op: UnaryOp,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum UnaryOp {
     /// `-`
     Minus,

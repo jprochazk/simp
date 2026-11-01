@@ -16,6 +16,12 @@ pub mod parser_flat;
 pub mod ast_super_flat;
 pub mod parser_super_flat;
 
+pub mod ast_super_flat_unsafe;
+pub mod parser_super_flat_unsafe;
+
+pub mod compile;
+pub mod walk;
+
 pub mod error;
 pub mod span;
 pub mod token;

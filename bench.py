@@ -6,8 +6,12 @@
 # ]
 # ///
 
+import json
 import os
+import re
+import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -20,6 +24,33 @@ KINDS = [
     "parser_flat",
     "parser_bump",
     "parser_super_flat",
+    "parser_super_flat_unsafe",
+]
+
+WALK_KINDS = [
+    "walk_tree",
+    "walk_interned",
+    "walk_flat",
+    "walk_bump",
+    "walk_super_flat",
+    "walk_super_flat_unsafe",
+]
+
+COMPILE_KINDS = [kind.replace("walk_", "compile_") for kind in WALK_KINDS]
+
+MODES = {
+    "parse": (KINDS, "bench", "Parser"),
+    "walk": (WALK_KINDS, "bench_walk", "Walk"),
+    "compile": (COMPILE_KINDS, "bench_compile", "Compile"),
+}
+
+HAVE_PERF = sys.platform == "linux" and shutil.which("perf") is not None
+
+PERF_EVENTS = [
+    "cycles:u",
+    "instructions:u",
+    "L1-dcache-load-misses:u",
+    "cache-misses:u",
 ]
 
 
@@ -176,6 +207,54 @@ def run_job(binary, kind, input_file):
     # but it has poor runtime precision.
     # We also don't care about "process overhead", so we
     # have the program measure and report its own runtime.
+    if sys.platform == "darwin":
+        result, runtime_sec, max_rss_kb, maj_pf, min_pf = measure_darwin(
+            time_prog, binary, kind, input_file
+        )
+    else:
+        result, runtime_sec, max_rss_kb, maj_pf, min_pf = measure_linux(
+            time_prog, binary, kind, input_file
+        )
+
+    res = {
+        "kind": kind,
+        "input_file": input_file,
+        "input_size_bytes": input_size_bytes,
+        "line_count": line_count,
+        "runtime_sec": runtime_sec,
+        "max_rss_kb": max_rss_kb,
+        "maj_pf": maj_pf,
+        "min_pf": min_pf,
+    }
+
+    if kind.startswith(("walk_", "compile_")):
+        stmts = int(re.search(r"stmts: (\d+)", result.stdout).group(1))
+        exprs = int(re.search(r"exprs: (\d+)", result.stdout).group(1))
+        res["nodes"] = stmts + exprs
+
+    return res
+
+
+def measure_darwin(time_prog, binary, kind, input_file):
+    result = subprocess.run(
+        [time_prog, "-l", binary, kind, input_file],
+        check=True, capture_output=True, text=True,
+    )
+
+    def stat(pattern):
+        match = re.search(pattern, result.stderr)
+        if match is None:
+            raise RuntimeError(f"Failed to parse {pattern!r} from program output")
+        return match.group(1)
+
+    runtime_sec = float(stat(r"BENCH_RUNTIME_SEC: ([\d.]+)"))
+    max_rss_kb = int(stat(r"(\d+)\s+maximum resident set size")) // 1024
+    maj_pf = int(stat(r"(\d+)\s+page faults"))
+    min_pf = int(stat(r"(\d+)\s+page reclaims"))
+    return result, runtime_sec, max_rss_kb, maj_pf, min_pf
+
+
+def measure_linux(time_prog, binary, kind, input_file):
     with tempfile.NamedTemporaryFile(mode="r+") as tf:
         time_cmd = [
             "taskset", "-c", "0",
@@ -215,16 +294,43 @@ def run_job(binary, kind, input_file):
         maj_pf = int(parts[1])
         min_pf = int(parts[2])
 
-    return {
-        "kind": kind,
-        "input_file": input_file,
-        "input_size_bytes": input_size_bytes,
-        "line_count": line_count,
-        "runtime_sec": runtime_sec,
-        "max_rss_kb": max_rss_kb,
-        "maj_pf": maj_pf,
-        "min_pf": min_pf,
-    }
+    return result, runtime_sec, max_rss_kb, maj_pf, min_pf
+
+
+def run_perf(binary, kind, input_file):
+    with tempfile.TemporaryDirectory() as tmp:
+        ctl = os.path.join(tmp, "ctl")
+        ack = os.path.join(tmp, "ack")
+        out = os.path.join(tmp, "perf.csv")
+        os.mkfifo(ctl)
+        os.mkfifo(ack)
+
+        cmd = [
+            "perf", "stat",
+            "-x", ",",
+            "-o", out,
+            "--delay=-1",
+            f"--control=fifo:{ctl},{ack}",
+            "-e", ",".join(PERF_EVENTS),
+            "taskset", "-c", "0",
+            binary, kind, input_file,
+        ]
+        env = dict(os.environ, SIMP_PERF_CTL=ctl, SIMP_PERF_ACK=ack)
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True, env=env)
+
+        iters = int(re.search(r"BENCH_ITERS: (\d+)", result.stderr).group(1))
+
+        counters = {}
+        with open(out) as f:
+            for line in f:
+                parts = line.strip().split(",")
+                if len(parts) < 3 or parts[2] not in PERF_EVENTS:
+                    continue
+                if not parts[0] or not parts[0][0].isdigit():
+                    raise RuntimeError(f"perf counter not available: {line!r}")
+                counters[parts[2]] = float(parts[0]) / iters
+
+    return counters
 
 
 def enrich_results(results):
@@ -236,7 +342,7 @@ def enrich_results(results):
         r["mloc_per_s"] = r["loc_per_s"] / 1_000_000
 
 
-def plot_results(results, output_prefix):
+def plot_results(results, output_prefix, label="Parser"):
     if not results:
         print("No results to plot.")
         return
@@ -262,8 +368,8 @@ def plot_results(results, output_prefix):
 
     plt.xlabel("Input size (MiB)")
     plt.ylabel("Runtime (s)")
-    plt.title("Parser Performance: Runtime vs Input Size")
-    plt.legend(title="Parser")
+    plt.title(f"{label} Performance: Runtime vs Input Size")
+    plt.legend(title=label)
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     runtime_path = f"{output_prefix}_runtime.png"
@@ -289,8 +395,8 @@ def plot_results(results, output_prefix):
 
     plt.xlabel("Input size (MiB)")
     plt.ylabel("Max RSS (MiB)")
-    plt.title("Parser Memory Usage: Max RSS vs Input Size")
-    plt.legend(title="Parser")
+    plt.title(f"{label} Memory Usage: Max RSS vs Input Size")
+    plt.legend(title=label)
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     rss_path = f"{output_prefix}_rss.png"
@@ -316,8 +422,8 @@ def plot_results(results, output_prefix):
 
     plt.xlabel("Input size (MiB)")
     plt.ylabel("Total Page Faults")
-    plt.title("Parser Page Faults: Total vs Input Size")
-    plt.legend(title="Parser")
+    plt.title(f"{label} Page Faults: Total vs Input Size")
+    plt.legend(title=label)
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     pf_path = f"{output_prefix}_pagefaults.png"
@@ -343,9 +449,9 @@ def plot_results(results, output_prefix):
 
     plt.xlabel("Input size (MiB)")
     plt.ylabel("MLoC/s")
-    plt.title("Parser Throughput: MLoC/s vs Input Size")
+    plt.title(f"{label} Throughput: MLoC/s vs Input Size")
     plt.xscale('log')
-    plt.legend(title="Parser")
+    plt.legend(title=label)
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     lps_path = f"{output_prefix}_loc.png"
@@ -354,13 +460,70 @@ def plot_results(results, output_prefix):
     plt.close()
 
 
+def plot_metric(results, kinds, key, ylabel, title, path, label):
+    plt.figure(figsize=(10, 7))
+    for kind in kinds:
+        data = sorted(
+            (r["input_size_mib"], r[key])
+            for r in results
+            if r["kind"] == kind and key in r
+        )
+        if not data:
+            continue
+        xs, ys = zip(*data)
+        plt.plot(xs, ys, marker='o', label=kind, linewidth=2, markersize=6)
+
+    plt.xlabel("Input size (MiB)")
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.xscale('log')
+    plt.legend(title=label)
+    plt.grid(True, linestyle="--", alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(path, dpi=200)
+    print(f"Wrote {key} plot to {path}")
+    plt.close()
+
+
+def plot_per_node_results(results, output_prefix, label):
+    for r in results:
+        nodes = r["nodes"]
+        r["ns_per_node"] = r["runtime_sec"] * 1e9 / nodes
+        for event in PERF_EVENTS:
+            if event in r:
+                r[f"{event}_per_node"] = r[event] / nodes
+
+    kinds = sorted(set(r["kind"] for r in results))
+    plot_metric(
+        results, kinds, "ns_per_node", "ns / node",
+        f"{label}: time per node vs Input Size",
+        f"{output_prefix}_ns_per_node.png",
+        label,
+    )
+    for event in PERF_EVENTS:
+        if not any(event in r for r in results):
+            continue
+        name = event.removesuffix(":u")
+        plot_metric(
+            results, kinds, f"{event}_per_node", f"{name} / node",
+            f"{label}: {name} per node vs Input Size",
+            f"{output_prefix}_{name}_per_node.png",
+            label,
+        )
+
+
 def main():
+    mode = sys.argv[1] if len(sys.argv) > 1 else "parse"
+    if mode not in MODES:
+        raise SystemExit(f"usage: {sys.argv[0]} [{'|'.join(MODES)}]")
+    kinds, output_prefix, label = MODES[mode]
+
     output_dir = "benches/inputs"
     input_files = generate_input_files(output_dir)
     binary_path = build_bench()
 
     results = []
-    for kind in KINDS:
+    for kind in kinds:
         for input_file in input_files:
             print(f"\n=== Running parser={kind} input={input_file} ===")
             res = run_job(binary_path, kind, input_file)
@@ -374,9 +537,24 @@ def main():
                 f"max_rss={res['max_rss_kb']} KB, "
                 f"maj_pf={res['maj_pf']}, min_pf={res['min_pf']}"
             )
+            if mode != "parse":
+                if HAVE_PERF:
+                    res.update(run_perf(binary_path, kind, input_file))
+                print(
+                    f"  ns/node={runtime_ms * 1e6 / res['nodes']:.3f}, "
+                    + ", ".join(
+                        f"{e.removesuffix(':u')}/node={res[e] / res['nodes']:.3f}"
+                        for e in PERF_EVENTS
+                        if e in res
+                    )
+                )
 
-    output_prefix = "bench"
-    plot_results(results, output_prefix)
+    with open(f"{output_prefix}_results.json", "w") as f:
+        json.dump(results, f, indent=1)
+
+    plot_results(results, output_prefix, label=label)
+    if mode != "parse":
+        plot_per_node_results(results, output_prefix, label)
 
 
 if __name__ == "__main__":

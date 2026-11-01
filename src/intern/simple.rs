@@ -61,6 +61,11 @@ impl<Id: Intern, T, S> SimpleInterner<Id, T, S> {
     pub fn get(&self, s: Id) -> Option<&T> {
         self.values.get(s.index() as usize)
     }
+
+    pub unsafe fn get_unchecked(&self, s: Id) -> &T {
+        let index = s.index() as usize;
+        unsafe { index_unchecked!(self.values, index) }
+    }
 }
 
 impl<Id: Intern + Copy, T: Hash + PartialEq, S: BuildHasher> SimpleInterner<Id, T, S> {

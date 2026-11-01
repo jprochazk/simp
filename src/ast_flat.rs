@@ -178,7 +178,7 @@ pub struct ExprBinary {
     pub rhs: ExprId,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum BinaryOp {
     /// `+`
     Add,
@@ -227,7 +227,7 @@ pub struct ExprUnary {
     pub op: UnaryOp,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum UnaryOp {
     /// `-`
     Minus,

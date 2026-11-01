@@ -56,6 +56,16 @@ fn parsers(c: &mut Criterion) {
         )
     });
 
+    group.bench_function("parse_super_flat_unsafe", |b| {
+        b.iter_batched(
+            || &input,
+            |input| {
+                let _ = simp::parser_super_flat_unsafe::parse(black_box(input)).unwrap();
+            },
+            criterion::BatchSize::PerIteration,
+        )
+    });
+
     group.finish();
 }
 

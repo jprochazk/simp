@@ -185,26 +185,26 @@ struct Tree {
 }
 
 impl Tree {
-    /// `[ value:32 child:24 tag:8 ]`
+    /// `[ child:32 value:24 tag:8 ]`
     fn new(tag: u8, child: u32, value: u32) -> Self {
         let tag = tag as u64;
         let child = child as u64;
         let value = value as u64;
 
         let packed = tag;
-        let packed = packed | ((child & U24_MASK) << 8);
-        let packed = packed | (value << 32);
+        let packed = packed | ((value & U24_MASK) << 8);
+        let packed = packed | (child << 32);
         Self {
             packed: Packed { repr: packed },
         }
     }
 
     fn child(self) -> u32 {
-        ((self.packed.repr >> 8) & U24_MASK) as u32
+        (self.packed.repr >> 32) as u32
     }
 
     fn value(self) -> u32 {
-        (self.packed.repr >> 32) as u32
+        ((self.packed.repr >> 8) & U24_MASK) as u32
     }
 }
 
@@ -215,26 +215,26 @@ struct DynTree {
 }
 
 impl DynTree {
-    /// `[ len:32 child:24 tag:8 ]`
+    /// `[ child:32 len:24 tag:8 ]`
     fn new(tag: u8, child: u32, len: u32) -> Self {
         let tag = tag as u64;
         let child = child as u64;
         let len = len as u64;
 
         let packed = tag;
-        let packed = packed | ((child & U24_MASK) << 8);
-        let packed = packed | (len << 32);
+        let packed = packed | ((len & U24_MASK) << 8);
+        let packed = packed | (child << 32);
         Self {
             packed: Packed { repr: packed },
         }
     }
 
     fn child(self) -> u32 {
-        ((self.packed.repr >> 8) & U24_MASK) as u32
+        (self.packed.repr >> 32) as u32
     }
 
     fn len(self) -> u32 {
-        (self.packed.repr >> 32) as u32
+        ((self.packed.repr >> 8) & U24_MASK) as u32
     }
 }
 
@@ -1208,5 +1208,10 @@ mod tests {
         eprintln!("{u24:032b}");
         assert_eq!(Tree::new(0, 1, u24).value(), u24);
         assert_eq!(Tree::new(0, 1, u24).value(), u24);
+
+        assert_eq!(Tree::new(0, u32::MAX, u24).child(), u32::MAX);
+        assert_eq!(Tree::new(0, u32::MAX, u24).value(), u24);
+        assert_eq!(DynTree::new(0, u32::MAX, u24).child(), u32::MAX);
+        assert_eq!(DynTree::new(0, u32::MAX, u24).len(), u24);
     }
 }
